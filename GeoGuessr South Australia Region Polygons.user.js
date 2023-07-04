@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr South Australia Region Polygons
 // @description  Overlays South Australia region polygons on the map
-// @version      0.1
+// @version      0.1.1
 // @author       miraclewhips & macca
 // @match        *://*.geoguessr.com/*
 // @run-at       document-start
@@ -80,24 +80,34 @@ function injecterCallback(overrider)
 	}).observe(document.documentElement, { childList: true, subtree: true })
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    injecter(() => {
-		google.maps.Map = class extends google.maps.Map {
-			constructor(...args) {
-				super(...args);
-				this.data.loadGeoJson('https://raw.githubusercontent.com/macca7224/south-australia-streaks/main/South_Australia_Regions.geojson');
-					this.data.setStyle((feature) => {
-							const name = feature.getProperty('region');
-							const color = colorMap[name];
+function addPolygons() {
+    google.maps.Map = class extends google.maps.Map {
+        constructor(...args) {
+            super(...args);
+            this.data.loadGeoJson('https://raw.githubusercontent.com/macca7224/south-australia-streaks/main/South_Australia_Regions.geojson');
+            this.data.setStyle((feature) => {
+                const name = feature.getProperty('region');
+                const color = colorMap[name];
 
-							return {
-									fillOpacity: 0.2,
-									fillColor: color,
-									strokeWeight: 1,
-									clickable: false
-							}
-					});
-			}
-		}
-	});
-});
+                return {
+                    fillOpacity: 0.2,
+                    fillColor: color,
+                    strokeWeight: 1,
+                    clickable: false
+                }
+            });
+        }
+    }
+}
+
+if (document.readyState !== 'loading') {
+    injecter(() => {
+        addPolygons();
+    });
+} else {
+    document.addEventListener('DOMContentLoaded', (event) => {
+        injecter(() => {
+            addPolygons();
+        });
+    });
+}
